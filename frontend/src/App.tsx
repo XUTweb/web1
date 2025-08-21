@@ -4,18 +4,24 @@ import LoginPage from "@/pages/LoginPage";
 import ProblemSelectionPage from "@/pages/ProblemSelectionPage";
 import ProblemSolvingPage from "@/pages/ProblemSolvingPage";
 import ProfilePage from "@/pages/ProfilePage";
+import AIGeneratedProblemPage from "@/pages/AIGeneratedProblemPage";
 import { useState, useEffect } from "react";
 import { AuthContext } from "@/contexts/authContext";
 import { toast } from "sonner";
 
 export default function App() {
+//这个状态量用于确定用户是否已经登录?
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+//这个状态量用于确定是否正在加载页面?
   const [loading, setLoading] = useState(true);
 
+//# 退出函数
   const logout = () => {
     setIsAuthenticated(false);
+//  用于清除本地存储和会话存储中的用户信息
     localStorage.removeItem("user");
     sessionStorage.removeItem("user");
+//用于显示退出失败的提示
     toast.success("已成功退出登录");
   };
 
@@ -25,16 +31,6 @@ export default function App() {
       const savedUser =
         localStorage.getItem("user") || sessionStorage.getItem("user");
       if (savedUser) {
-        const userData = JSON.parse(savedUser);
-
-        // 检查是否过期（仅在localStorage中存储的用户需要检查）
-        if (localStorage.getItem("user")) {
-          if (userData.expiry && Date.now() > userData.expiry) {
-            localStorage.removeItem("user");
-            setIsAuthenticated(false);
-            return;
-          }
-        }
         setIsAuthenticated(true);
       }
       setLoading(false);
@@ -104,6 +100,14 @@ export default function App() {
           path="/other"
           element={
             <div className="text-center text-xl">Other Page - Coming Soon</div>
+          }
+        />
+        <Route
+          path="/ai-generate"
+          element={
+            <ProtectedRoute>
+              <AIGeneratedProblemPage />
+            </ProtectedRoute>
           }
         />
         <Route path="*" element={<Navigate to="/login" replace />} />
