@@ -1,7 +1,6 @@
-## 展示
-## 展示
-![首页截图](frontend/sourse/home_page.png)
 
+## 展示
+![[home_page.png]]
 
 ## 环境准备
 
