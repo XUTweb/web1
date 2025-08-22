@@ -1,11 +1,23 @@
+## 展示
+
+![](sourse/home_page.png)
+
 ## 环境准备
 
 - 安装 [Node.js](https://nodejs.org/en)
 - 安装 [pnpm](https://pnpm.io/installation)
 
+
 ## 操作步骤
 
+- 到达前端文件夹
+
+```sh
+cd frontend
+```
+
 - 安装依赖
+
 ```sh
 pnpm install
 ```
@@ -16,10 +28,18 @@ pnpm install
 pnpm run dev
 ```
 
+- 本项目现阶段使用 json-server 模拟 API,如果要登录的话运行运行如下代码
+
+```sh
+pnpm install -g json-server
+json-server --watch db.json --port 3001
+```
+
 - 在浏览器访问 http://localhost:3000
 
 ## 项目介绍
-- **React 18+** 作为核心UI框架
+
+- **React 18+** 作为核心 UI 框架
 - **TypeScript** 提供类型安全
 - **Vite** 作为构建工具
 - **Tailwind CSS** 作为样式解决方案
@@ -27,7 +47,8 @@ pnpm run dev
 - **Framer Motion** 提供动画效果
 - **Recharts** 用于数据可视化
 - **Context API** 进行状态管理
-- 
+-
+
 ```
 src/
 ├── components/         # 可复用组件
@@ -48,10 +69,13 @@ src/
 ├── App.tsx            # 主应用组件
 └── main.tsx           # 应用入口点
 ```
-## 必要vscode插件
-为了增加项目代码的可读性,建议安装vscode的插件  
+
+## 必要 vscode 插件
+
+为了增加项目代码的可读性,建议安装 vscode 的插件  
 1.**Btter Comments**(用于丰富注释形式):
-并在setting.json中添加以下配置:
+并在 setting.json 中添加以下配置:
+
 ```json
 "better-comments.tags": [
     {
@@ -111,8 +135,9 @@ src/
     }
 
 ```
+
 2.**Color Highlight**(用于高亮注释颜色)
 
-
 ## 项目解释:
-  这个项目是提供计算机类大学生刷题的网站项目,我们在网页上提供了一些题目,用户可以登录后进行刷题,并且可以查看自己的做题记录,以及一些统计信息。并提供了Ai生成题目自动检查答案的功能。# web1
+
+这个项目是提供计算机类大学生刷题的网站项目,我们在网页上提供了一些题目,用户可以登录后进行刷题,并且可以查看自己的做题记录,以及一些统计信息。并提供了 Ai 生成题目自动检查答案的功能。# web1
