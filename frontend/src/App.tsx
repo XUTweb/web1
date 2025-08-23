@@ -3,7 +3,6 @@ import Home from "@/pages/Home";
 import LoginPage from "@/pages/LoginPage";
 import ProblemSelectionPage from "@/pages/ProblemSelectionPage";
 import ProblemSolvingPage from "@/pages/ProblemSolvingPage";
-import AIGeneratedProblemPage from "@/pages/AIGeneratedProblemPage";
 import { useState, useEffect } from "react";
 import { AuthContext } from "@/contexts/authContext";
 import { toast } from "sonner";
@@ -59,8 +58,9 @@ export default function App() {
     <AuthContext.Provider
       value={{ isAuthenticated, setIsAuthenticated, logout }}
     >
-      <Routes>
-        <Route path="/" element={<Home />} />
+      <div className="bg-gray-50" style={{ minHeight: "100vh" }}>
+        <Routes>
+            <Route path="/" element={<Home />} />
         <Route
           path="/login"
           element={
@@ -93,16 +93,10 @@ export default function App() {
             <div className="text-center text-xl">Other Page - Coming Soon</div>
           }
         />
-        <Route
-          path="/ai-generate"
-          element={
-            <ProtectedRoute>
-              <AIGeneratedProblemPage />
-            </ProtectedRoute>
-          }
-        />
+        {/* AI生成功能已整合到ProblemSelectionPage中 */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
+      </div>
     </AuthContext.Provider>
   );
 }

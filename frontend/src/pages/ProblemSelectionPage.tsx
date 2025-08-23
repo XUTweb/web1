@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import ProfilePanel from "@/components/ProfilePanel";
+import AIGeneratePanel from "@/components/AIGeneratePanel";
+import { useContext } from "react";
+import { AuthContext } from "@/contexts/authContext";
 
 // 题目类型定义
 interface Problem {
@@ -142,14 +145,55 @@ export default function ProblemSelectionPage() {
   const [showCompleted, setShowCompleted] = useState(true);
   const [showBookmarked, setShowBookmarked] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeView, setActiveView] = useState<"problems" | "profile">(
+  const [activeView, setActiveView] = useState<"problems" | "profile" | "ai-generate">(
     "problems"
   );
-  const [sidebarVisible, setSidebarVisible] = useState(true);
+  
+  // 处理AI生成的题目
+  const handleGeneratedProblems = (problems: any[]) => {
+    // 将生成的题目添加到问题列表中
+    const newProblems = problems.map(problem => ({
+      ...problem,
+      completed: false,
+      bookmarked: false,
+      通过率: 0
+    }));
+    
+    setProblems(prev => [...prev, ...newProblems]);
+    setFilteredProblems(prev => [...prev, ...newProblems]);
+    
+    // 切换到题目视图
+    setActiveView("problems");
+    toast.success("题目已添加到题库！");
+  };
+
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false); // 控制设置菜单的显示状态
+  const [bgColor, setBgColor] = useState("bg-gray-50"); // 当前背景颜色
   const problemsPerPage = 6;
 
   const navigate = useNavigate();
+  const { logout } = useContext(AuthContext); // 使用 AuthContext 中的 logout 函数
+
+  // 当导航栏关闭时，自动关闭设置菜单
+  useEffect(() => {
+    if (sidebarCollapsed) {
+      setShowSettingsMenu(false);
+    }
+  }, [sidebarCollapsed]);
+
+  // 退出登录函数
+  const handleLogout = () => {
+    localStorage.removeItem("userProblems"); // 清除题目数据
+    logout(); // 调用 AuthContext 中的 logout 函数
+    setShowSettingsMenu(false); // 关闭设置菜单
+  };
+
+  // 切换设置菜单显示状态
+  const toggleSettingsMenu = () => {
+    setShowSettingsMenu(!showSettingsMenu);
+  };
 
   // 初始化题目数据
   useEffect(() => {
@@ -266,20 +310,20 @@ export default function ProblemSelectionPage() {
         <aside
           className={cn(
             "fixed md:static inset-y-0 left-0 z-50 shadow-lg border-r-2 border-gray-200 bg-white transition-all duration-500 ease-in-out flex-shrink-0",
-            sidebarVisible ? (sidebarCollapsed ? "translate-x-0 w-16" : "translate-x-0 w-64") : "-translate-x-full w-0 md:translate-x-0 md:w-16"
+            sidebarCollapsed ? "translate-x-0 w-16" : "translate-x-0 w-64"
           )}
         >
-          {/* 边框栏收缩/展开按钮 */}
+          {/* 边框栏收缩/展开按钮 - 灵动设计 */}
           <button
             onClick={() => {
               setSidebarCollapsed(!sidebarCollapsed);
             }}
-            className="text-gray-500 hover:text-blue-600 p-2 absolute -right-3 top-4 z-10 bg-white rounded-full shadow-md border border-gray-200 transition-all duration-300 hover:scale-110"
+            className="text-gray-600 hover:text-blue-600 p-2 absolute -right-3 top-1/2 -translate-y-1/2 z-10 bg-gradient-to-r from-white to-gray-50 rounded-full shadow-lg border border-gray-200 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:border-blue-300 flex items-center justify-center"
           >
             {sidebarCollapsed ? (
-              <i className="fa-solid fa-chevron-right text-sm"></i>
+              <i className="iconfont icon-forward_line text-sm transform transition-transform duration-300 hover:translate-x-1"></i>
             ) : (
-              <i className="fa-solid fa-chevron-left text-sm"></i>
+              <i className="iconfont icon-backward_line text-sm transform transition-transform duration-300 hover:-translate-x-1"></i>
             )}
           </button>
           <div className="h-full flex flex-col">
@@ -291,35 +335,51 @@ export default function ProblemSelectionPage() {
                 </span>
               )}
             </div>
-            <div className={`flex-1 overflow-y-auto transition-all duration-500 ${sidebarCollapsed ? "p-2" : "p-4"}`}>
+            <div
+              className={`flex-1 overflow-y-auto transition-all duration-500 ${
+                sidebarCollapsed ? "p-2" : "p-4"
+              }`}
+            >
               <nav className="space-y-1">
                 <button
                   onClick={() => setActiveView("problems")}
                   className={cn(
-                    "w-full flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors",
-                    activeView === "profile"
-                      ? "text-blue-600 bg-blue-50 border border-blue-200"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                    "w-full flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300",
+                    activeView === "problems"
+                      ? "text-blue-600 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 shadow-sm"
+                      : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:text-blue-600 hover:shadow-sm"
                   )}
                 >
-                  <i className="fa-solid fa-list-ul flex-shrink-0"></i>
-                  {!sidebarCollapsed && <span className="ml-3 whitespace-nowrap transition-opacity duration-300">题目列表</span>}
+                  <i className="fa-solid fa-list-ul flex-shrink-0 transition-transform duration-300 group-hover:scale-110"></i>
+                  {!sidebarCollapsed && (
+                    <span className="ml-3 whitespace-nowrap transition-all duration-300 group-hover:translate-x-1">
+                      题目列表
+                    </span>
+                  )}
                 </button>
 
                 <button
                   onClick={() => setActiveView("profile")}
                   className={cn(
-                    "w-full flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors",
+                    "w-full flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300",
                     activeView === "profile"
-                      ? "text-blue-600 bg-blue-50 border border-blue-200"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                      ? "text-blue-600 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 shadow-sm"
+                      : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:text-blue-600 hover:shadow-sm"
                   )}
                 >
-                  <i className="fa-solid fa-user-circle flex-shrink-0"></i>
-                  {!sidebarCollapsed && <span className="ml-3 whitespace-nowrap transition-opacity duration-300">个人中心</span>}
+                  <i className="fa-solid fa-user-circle flex-shrink-0 transition-transform duration-300 group-hover:scale-110"></i>
+                  {!sidebarCollapsed && (
+                    <span className="ml-3 whitespace-nowrap transition-all duration-300 group-hover:translate-x-1">
+                      个人中心
+                    </span>
+                  )}
                 </button>
 
-                <div className={`pt-4 pb-2 transition-all duration-500 ${sidebarCollapsed ? "px-2" : "px-4"}`}>
+                <div
+                  className={`pt-4 pb-2 transition-all duration-500 ${
+                    sidebarCollapsed ? "px-2" : "px-4"
+                  }`}
+                >
                   {!sidebarCollapsed && (
                     <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider transition-opacity duration-300">
                       功能
@@ -328,46 +388,109 @@ export default function ProblemSelectionPage() {
                 </div>
 
                 <button
-                  onClick={() => navigate("/ai-generate")}
+                  onClick={() => setActiveView("ai-generate")}
                   className={cn(
-                    "w-full flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors",
-                    activeView === "profile"
-                      ? "text-blue-600 bg-blue-50 border border-blue-200"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                    "w-full flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300",
+                    activeView === "ai-generate"
+                      ? "text-blue-600 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 shadow-sm"
+                      : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:text-blue-600 hover:shadow-sm"
                   )}
                 >
-                  <i className="fa-solid fa-magic flex-shrink-0"></i>
-                  {!sidebarCollapsed && <span className="ml-3 whitespace-nowrap transition-opacity duration-300">AI 题目生成</span>}
+                  <i className="fa-solid fa-magic flex-shrink-0 transition-transform duration-300 group-hover:scale-110"></i>
+                  {!sidebarCollapsed && (
+                    <span className="ml-3 whitespace-nowrap transition-all duration-300 group-hover:translate-x-1">
+                      AI 题目生成
+                    </span>
+                  )}
                 </button>
               </nav>
             </div>
 
-            <div className={`p-4 border-t border-gray-200 transition-all duration-500 ${sidebarCollapsed ? "p-2" : "p-4"}`}>
-              <div className="text-center text-sm text-gray-500">
-                {!sidebarCollapsed && <p>&copy; {new Date().getFullYear()}XUTCode</p>}
-              </div>
+            {/* 底部设置按钮 */}
+            <div
+              className={cn("relative mt-auto", sidebarCollapsed && "-mb+5")}
+              onClick={toggleSettingsMenu}
+            >
+              <button className="flex items-center h-16 px-4 border-t border-gray-200 overflow-hidden hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-all duration-300 w-full group">
+                <i className="fa-solid fa-gear text-gray-500 text-xl flex-shrink-0 transition-transform duration-300 group-hover:rotate-90 group-hover:text-blue-600"></i>
+                {!sidebarCollapsed && (
+                  <span className="text-lg font-medium text-gray-700 ml-2 whitespace-nowrap transition-all duration-300 group-hover:translate-x-1 group-hover:text-blue-600">
+                    设置
+                  </span>
+                )}
+              </button>
+
+              {/* 设置弹出菜单 - 类似 VSCode 的弹出面板 */}
+              {showSettingsMenu && (
+                <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden transition-all duration-200 transform origin-bottom-left animate-scaleIn">
+                  <div className="py-2 bg-gray-50 border-b border-gray-200 px-4 text-sm font-medium text-gray-700">
+                    设置选项
+                  </div>
+                  <div className="py-1">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                    >
+                      <i className="fa-solid fa-right-from-bracket mr-3 text-gray-500"></i>
+                      <span>退出登录</span>
+                    </button>
+                    <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                      <i className="fa-solid fa-circle-info mr-3 text-gray-500"></i>
+                      <span>关于</span>
+                    </button>
+                    <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                      <i className="fa-solid fa-question-circle mr-3 text-gray-500"></i>
+                      <span>帮助</span>
+                    </button>
+                    <div className="border-t border-gray-200 my-1"></div>
+                    <div className="px-4 py-2 text-sm font-medium text-gray-700">
+                      背景颜色
+                    </div>
+                    <div className="grid grid-cols-3 gap-2 px-2 py-1">
+                      {[
+                        { name: "浅灰", value: "bg-gray-50" },
+                        { name: "白色", value: "bg-white" },
+                        { name: "浅蓝", value: "bg-blue-50" },
+                        { name: "浅绿", value: "bg-green-50" },
+                        { name: "浅黄", value: "bg-yellow-50" },
+                        { name: "浅紫", value: "bg-purple-50" },
+                        { name: "深灰", value: "bg-gray-800" },
+                        { name: "深蓝", value: "bg-blue-900" },
+                        { name: "深绿", value: "bg-green-900" }
+                      ].map((color) => (
+                        <button
+                          key={color.value}
+                          onClick={() => {
+                            setBgColor(color.value);
+                            localStorage.setItem("bgColor", color.value);
+                            toast.success(`背景已更改为${color.name}`);
+                          }}
+                          className={`h-8 rounded-md border transition-all duration-200 ${bgColor === color.value ? "ring-2 ring-blue-500 ring-offset-2" : "border-gray-200"}`}
+                          style={{ backgroundColor: color.value.replace("bg-", "").split("-")[0] === "gray" && color.value.includes("800") ? "#1f2937" : color.value.replace("bg-", "").split("-")[0] === "blue" && color.value.includes("900") ? "#1e3a8a" : color.value.replace("bg-", "").split("-")[0] === "green" && color.value.includes("900") ? "#14532d" : "" }}
+                          title={color.name}
+                        >
+                          <div className={`w-full h-full rounded-md ${color.value}`}></div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </aside>
 
-        {/* 主内容区 */}
+        {/* 主内容区 - 使用padding-left而不是margin来避免布局偏移 */}
         <main
           className={cn(
             "flex-grow overflow-y-auto p-4 sm:p-6 lg:p-8 transition-all duration-300",
             "max-w-7xl mx-auto",
-            "md:ml-0" 
+            bgColor,
+            sidebarCollapsed ? "md:pl-16" : "md:pl-64"
           )}
         >
           <div>
-            {/* 在这个位置添加回复按钮 */}
-            {!sidebarVisible && (
-              <button
-                onClick={() => setSidebarVisible(true)}
-                className="fixed top-4 left-4 z-50 bg-white shadow-lg rounded-lg p-2 text-gray-600 hover:text-blue-600"
-              >
-                <i className="fa-solid fa-bars"></i>
-              </button>
-            )}
+
             {activeView === "problems" ? (
               <>
                 <div className="mb-8">
@@ -425,7 +548,9 @@ export default function ProblemSelectionPage() {
                               ? "bg-green-100 text-green-800"
                               : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                           )}
+                          aria-label="筛选简单难度题目"
                         >
+                          <i className="fa-solid fa-check mr-1"></i>
                           简单
                         </button>
                         <button
@@ -436,7 +561,9 @@ export default function ProblemSelectionPage() {
                               ? "bg-yellow-100 text-yellow-800"
                               : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                           )}
+                          aria-label="筛选中等难度题目"
                         >
+                          <i className="fa-solid fa-check mr-1"></i>
                           中等
                         </button>
                         <button
@@ -447,7 +574,9 @@ export default function ProblemSelectionPage() {
                               ? "bg-red-100 text-red-800"
                               : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                           )}
+                          aria-label="筛选困难难度题目"
                         >
+                          <i className="fa-solid fa-check mr-1"></i>
                           困难
                         </button>
                       </div>
@@ -463,6 +592,7 @@ export default function ProblemSelectionPage() {
                         checked={showCompleted}
                         onChange={(e) => setShowCompleted(e.target.checked)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        aria-label="显示已完成题目"
                       />
                       <label
                         htmlFor="showCompleted"
@@ -479,6 +609,7 @@ export default function ProblemSelectionPage() {
                         checked={showBookmarked}
                         onChange={(e) => setShowBookmarked(e.target.checked)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        aria-label="只显示收藏题目"
                       />
                       <label
                         htmlFor="showBookmarked"
@@ -513,12 +644,14 @@ export default function ProblemSelectionPage() {
                                   toggleBookmark(problem.id);
                                 }}
                                 className="text-gray-400 hover:text-yellow-500 transition-colors"
+                                aria-label={problem.bookmarked ? "取消收藏此题目" : "收藏此题目"}
                               >
                                 {problem.bookmarked ? (
                                   <i className="fa-solid fa-bookmark text-yellow-500"></i>
                                 ) : (
                                   <i className="fa-regular fa-bookmark"></i>
                                 )}
+                                <span className="sr-only">{problem.bookmarked ? "已收藏" : "未收藏"}</span>
                               </button>
                             </div>
 
@@ -583,8 +716,10 @@ export default function ProblemSelectionPage() {
                             }
                             disabled={currentPage === 1}
                             className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            aria-label="上一页"
                           >
                             <i className="fa-solid fa-chevron-left text-xs"></i>
+                            <span className="sr-only">上一页</span>
                           </button>
 
                           {pageNumbers.map((number) => (
@@ -610,8 +745,10 @@ export default function ProblemSelectionPage() {
                             }
                             disabled={currentPage === totalPages}
                             className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                            aria-label="下一页"
                           >
                             <i className="fa-solid fa-chevron-right text-xs"></i>
+                            <span className="sr-only">下一页</span>
                           </button>
                         </nav>
                       </div>
@@ -643,21 +780,23 @@ export default function ProblemSelectionPage() {
                   </div>
                 )}
               </>
-            ) : (
+            ) : activeView === "profile" ? (
               <ProfilePanel />
+            ) : (
+              <AIGeneratePanel onProblemsGenerated={handleGeneratedProblems} />
             )}
           </div>
         </main>
       </div>
 
       {/* 页脚 */}
-      <footer className="bg-white border-t border-gray-200 py-6">
+      <footer className="bg-white border-t border-gray-200 py-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-gray-500">
               &copy; {new Date().getFullYear()} XUTCode. 保留所有权利.
             </p>
-            <div className="flex space-x-6 mt-4 md:mt-0">
+            <div className="flex space-x-6 mt-2 md:mt-0">
               <a href="#" className="text-gray-400 hover:text-gray-500">
                 <i className="fa-solid fa-question-circle"></i>
                 <span className="ml-1">帮助中心</span>

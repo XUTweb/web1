@@ -11,7 +11,7 @@ interface CustomCheckboxProps {
   className?: string;
   disabled?: boolean;
 }
-
+// 这个组件是用来创建自定义复选框的，它接受以下参数：
 export default function CustomCheckbox({
   id,
   checked,
