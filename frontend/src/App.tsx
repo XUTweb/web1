@@ -3,7 +3,6 @@ import Home from "@/pages/Home";
 import LoginPage from "@/pages/LoginPage";
 import ProblemSelectionPage from "@/pages/ProblemSelectionPage";
 import ProblemSolvingPage from "@/pages/ProblemSolvingPage";
-import ProfilePage from "@/pages/ProfilePage";
 import AIGeneratedProblemPage from "@/pages/AIGeneratedProblemPage";
 import { useState, useEffect } from "react";
 import { AuthContext } from "@/contexts/authContext";
@@ -85,14 +84,6 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ProblemSolvingPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <ProfilePage />
             </ProtectedRoute>
           }
         />

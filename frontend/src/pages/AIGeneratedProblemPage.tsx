@@ -79,8 +79,8 @@ export default function AIGeneratedProblemPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* 页面内容 */}
-      <main className="flex-grow max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
+      <main className="flex-grow max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 ">
+        <div className="mb-8 ">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">AI 题目生成</h1>
           <p className="text-gray-500">根据您的需求，自动生成编程题目</p>
         </div>
