@@ -27,14 +27,24 @@ git commit -m "提交说明": 将暂存区中的更改提交到本地仓库，�
 git log: 查看提交历史，包括提交哈希值、作者、日期和提交说明。
 git log --oneline: 以简洁的单行格式查看提交历史。
 
-## 7. 创建分支：
+## 7. 创建分支 and 查看分支 and 删除分支
 
 git branch <branch_name>: 创建一个新的分支。
 
-## 8. 切换分支：
+git branch: 查看所有本地分支。
+git branch -r: 查看所有远程分支。
+git branch -a: 查看所有本地和远程分支。
+
+
+git branch -d <branch_name>: 删除指定分支（已合并的分支）。
+git branch -D <branch_name>: 强制删除指定分支（未合并的分支）。
+
+
+## 8. 切换分支 and 删除分支
 
 git checkout <branch_name>: 切换到指定分支。
 git checkout -b <branch_name>: 创建并切换到新的分支。
+
 
 ## 9. 合并分支：
 
@@ -62,6 +72,12 @@ git stash pop: 恢复最近一次暂存的更改。
 
 git diff: 查看工作目录中未暂存的更改。
 git diff --staged: 查看暂存区中已暂存的更改。
+
+
+## 15. 链接远端仓库 -- 使用ssh
+
+git remote add origin git@github.com:username/repo.git
+
 
 ## 常用工作流程：
 
