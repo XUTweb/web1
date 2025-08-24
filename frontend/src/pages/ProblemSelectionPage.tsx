@@ -310,7 +310,8 @@ export default function ProblemSelectionPage() {
         <aside
           className={cn(
             "fixed md:static inset-y-0 left-0 z-50 shadow-lg border-r-2 border-gray-200 bg-white transition-all duration-500 ease-in-out flex-shrink-0",
-            sidebarCollapsed ? "translate-x-0 w-16" : "translate-x-0 w-64"
+            sidebarCollapsed ? "translate-x-0 w-16" : "translate-x-0 w-64",
+      
           )}
         >
           {/* 边框栏收缩/展开按钮 - 灵动设计 */}
@@ -484,7 +485,6 @@ export default function ProblemSelectionPage() {
         <main
           className={cn(
             "flex-grow overflow-y-auto p-4 sm:p-6 lg:p-8 transition-all duration-300",
-            "max-w-7xl mx-auto",
             bgColor,
             sidebarCollapsed ? "md:pl-16" : "md:pl-64"
           )}

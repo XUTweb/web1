@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+
+# 忽略Learn的缓存目录
+/learn
