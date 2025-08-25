@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import ProfilePanel from "@/components/ProfilePanel";
-import AIGeneratePanel from "@/components/AIGeneratePanel";
+import ProfilePanel from "@/pages/ProfilePanel";
+import AIGeneratePanel from "@/pages/AIGeneratePanel";
+import BookmarkPanel from "@/pages/BookmarkPanel";
 import { useContext } from "react";
 import { AuthContext } from "@/contexts/authContext";
 
@@ -145,32 +146,32 @@ export default function ProblemSelectionPage() {
   const [showCompleted, setShowCompleted] = useState(true);
   const [showBookmarked, setShowBookmarked] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeView, setActiveView] = useState<"problems" | "profile" | "ai-generate">(
-    "problems"
-  );
-  
+  const [activeView, setActiveView] = useState<
+    "problems" | "profile" | "ai-generate" | "bookmarks"
+  >("problems");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false); // 控制设置菜单的显示状态
+  const [bgColor, setBgColor] = useState(
+    "bg-gradient-to-br from-blue-100 to-blue-300"
+  ); // 当前背景颜色
   // 处理AI生成的题目
   const handleGeneratedProblems = (problems: any[]) => {
     // 将生成的题目添加到问题列表中
-    const newProblems = problems.map(problem => ({
+    const newProblems = problems.map((problem) => ({
       ...problem,
       completed: false,
       bookmarked: false,
-      通过率: 0
+      通过率: 0,
     }));
-    
-    setProblems(prev => [...prev, ...newProblems]);
-    setFilteredProblems(prev => [...prev, ...newProblems]);
-    
+
+    setProblems((prev) => [...prev, ...newProblems]);
+    setFilteredProblems((prev) => [...prev, ...newProblems]);
+
     // 切换到题目视图
     setActiveView("problems");
     toast.success("题目已添加到题库！");
   };
 
-
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [showSettingsMenu, setShowSettingsMenu] = useState(false); // 控制设置菜单的显示状态
-  const [bgColor, setBgColor] = useState("bg-gray-50"); // 当前背景颜色
   const problemsPerPage = 6;
 
   const navigate = useNavigate();
@@ -309,9 +310,9 @@ export default function ProblemSelectionPage() {
         {/* 左侧导航栏 - 类似豆包网页版的丝滑收缩任务栏 */}
         <aside
           className={cn(
-            "fixed md:static inset-y-0 left-0 z-50 shadow-lg border-r-2 border-gray-200 bg-white transition-all duration-500 ease-in-out flex-shrink-0",
-            sidebarCollapsed ? "translate-x-0 w-16" : "translate-x-0 w-64",
-      
+            bgColor,
+            "fixed md:static inset-y-0 left-0 z-50 shadow-lg border-r-2 border-gray-200transition-all duration-500 ease-in-out flex-shrink-0",
+            sidebarCollapsed ? "translate-x-0 w-16" : "translate-x-0 w-64"
           )}
         >
           {/* 边框栏收缩/展开按钮 - 灵动设计 */}
@@ -319,12 +320,12 @@ export default function ProblemSelectionPage() {
             onClick={() => {
               setSidebarCollapsed(!sidebarCollapsed);
             }}
-            className="text-gray-600 hover:text-blue-600 p-2 absolute -right-3 top-1/2 -translate-y-1/2 z-10 bg-gradient-to-r from-white to-gray-50 rounded-full shadow-lg border border-gray-200 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:border-blue-300 flex items-center justify-center"
+            className="text-gray-600 hover:text-blue-600 p-2 absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-gradient-to-r from-white to-gray-50 rounded-full shadow-lg border border-gray-200 transition-all duration-300 hover:scale-110 hover:shadow-xl hover:border-blue-300 flex items-center justify-center"
           >
             {sidebarCollapsed ? (
-              <i className="iconfont icon-forward_line text-sm transform transition-transform duration-300 hover:translate-x-1"></i>
+              <i className="iconfont icon-chevron_rectangle_right text-sm transform transition-transform duration-300 hover:translate-x-1"></i>
             ) : (
-              <i className="iconfont icon-backward_line text-sm transform transition-transform duration-300 hover:-translate-x-1"></i>
+              <i className="iconfont icon-chevron_rectangle_left text-sm transform transition-transform duration-300 hover:-translate-x-1"></i>
             )}
           </button>
           <div className="h-full flex flex-col">
@@ -376,6 +377,23 @@ export default function ProblemSelectionPage() {
                   )}
                 </button>
 
+                <button
+                  onClick={() => setActiveView("bookmarks")}
+                  className={cn(
+                    "w-full flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300",
+                    activeView === "bookmarks"
+                      ? "text-blue-600 bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 shadow-sm"
+                      : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:text-blue-600 hover:shadow-sm"
+                  )}
+                >
+                  <i className="fa-solid fa-bookmark flex-shrink-0 transition-transform duration-300 group-hover:scale-110"></i>
+                  {!sidebarCollapsed && (
+                    <span className="ml-3 whitespace-nowrap transition-all duration-300 group-hover:translate-x-1">
+                      我的收藏
+                    </span>
+                  )}
+                </button>
+
                 <div
                   className={`pt-4 pb-2 transition-all duration-500 ${
                     sidebarCollapsed ? "px-2" : "px-4"
@@ -412,7 +430,13 @@ export default function ProblemSelectionPage() {
               className={cn("relative mt-auto", sidebarCollapsed && "-mb+5")}
               onClick={toggleSettingsMenu}
             >
-              <button className="flex items-center h-16 px-4 border-t border-gray-200 overflow-hidden hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 transition-all duration-300 w-full group">
+              <button
+                className={cn(
+                  "w-full flex items-center px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300",
+                  "relative mt-auto",
+                  sidebarCollapsed && "-mb+5"
+                )}
+              >
                 <i className="fa-solid fa-gear text-gray-500 text-xl flex-shrink-0 transition-transform duration-300 group-hover:rotate-90 group-hover:text-blue-600"></i>
                 {!sidebarCollapsed && (
                   <span className="text-lg font-medium text-gray-700 ml-2 whitespace-nowrap transition-all duration-300 group-hover:translate-x-1 group-hover:text-blue-600">
@@ -423,41 +447,45 @@ export default function ProblemSelectionPage() {
 
               {/* 设置弹出菜单 - 类似 VSCode 的弹出面板 */}
               {showSettingsMenu && (
-                <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden transition-all duration-200 transform origin-bottom-left animate-scaleIn">
-                  <div className="py-2 bg-gray-50 border-b border-gray-200 px-4 text-sm font-medium text-gray-700">
+                <div className="absolute bottom-full left-0 mb-2 w-64 rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden transition-all duration-200 transform origin-bottom-left animate-scaleIn bg-white">
+                  <div className="py-2 bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200 px-4 text-sm font-medium text-blue-700">
                     设置选项
                   </div>
                   <div className="py-1">
                     <button
                       onClick={handleLogout}
-                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                      className="flex items-center w-full px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:text-blue-600 hover:shadow-sm"
                     >
                       <i className="fa-solid fa-right-from-bracket mr-3 text-gray-500"></i>
                       <span>退出登录</span>
                     </button>
-                    <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                    <button className="flex items-center w-full px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:text-blue-600 hover:shadow-sm">
                       <i className="fa-solid fa-circle-info mr-3 text-gray-500"></i>
                       <span>关于</span>
                     </button>
-                    <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                    <button className="flex items-center w-full px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:text-blue-600 hover:shadow-sm">
                       <i className="fa-solid fa-question-circle mr-3 text-gray-500"></i>
                       <span>帮助</span>
                     </button>
                     <div className="border-t border-gray-200 my-1"></div>
-                    <div className="px-4 py-2 text-sm font-medium text-gray-700">
+                    <div className="px-4 py-2 text-sm font-medium text-blue-700 bg-gradient-to-r from-blue-50 to-blue-100">
                       背景颜色
                     </div>
-                    <div className="grid grid-cols-3 gap-2 px-2 py-1">
+                    <div className="grid grid-cols-2 gap-2 px-2 py-1">
                       {[
-                        { name: "浅灰", value: "bg-gray-50" },
-                        { name: "白色", value: "bg-white" },
-                        { name: "浅蓝", value: "bg-blue-50" },
-                        { name: "浅绿", value: "bg-green-50" },
-                        { name: "浅黄", value: "bg-yellow-50" },
-                        { name: "浅紫", value: "bg-purple-50" },
-                        { name: "深灰", value: "bg-gray-800" },
-                        { name: "深蓝", value: "bg-blue-900" },
-                        { name: "深绿", value: "bg-green-900" }
+                        {
+                          name: "浅蓝渐变",
+                          value: "bg-gradient-to-br from-blue-100 to-blue-300",
+                        },
+                        {
+                          name: "浅绿渐变",
+                          value:
+                            "bg-gradient-to-br from-green-100 to-green-300",
+                        },
+                        {
+                          name: "origin",
+                          value: "bg-gradient-to-br from-blue-100 to-blue-100",
+                        },
                       ].map((color) => (
                         <button
                           key={color.value}
@@ -466,11 +494,25 @@ export default function ProblemSelectionPage() {
                             localStorage.setItem("bgColor", color.value);
                             toast.success(`背景已更改为${color.name}`);
                           }}
-                          className={`h-8 rounded-md border transition-all duration-200 ${bgColor === color.value ? "ring-2 ring-blue-500 ring-offset-2" : "border-gray-200"}`}
-                          style={{ backgroundColor: color.value.replace("bg-", "").split("-")[0] === "gray" && color.value.includes("800") ? "#1f2937" : color.value.replace("bg-", "").split("-")[0] === "blue" && color.value.includes("900") ? "#1e3a8a" : color.value.replace("bg-", "").split("-")[0] === "green" && color.value.includes("900") ? "#14532d" : "" }}
+                          className={`h-8 rounded-md border transition-all duration-200 ${
+                            bgColor === color.value
+                              ? "ring-2 ring-blue-500 ring-offset-2"
+                              : "border-gray-200"
+                          }`}
+                          style={{
+                            background: color.value.includes("gradient")
+                              ? color.value.replace("bg-", "")
+                              : "",
+                          }}
                           title={color.name}
                         >
-                          <div className={`w-full h-full rounded-md ${color.value}`}></div>
+                          <div
+                            className={`w-full h-full rounded-md ${
+                              color.value.includes("gradient")
+                                ? color.value
+                                : "bg-" + color.value
+                            }`}
+                          ></div>
                         </button>
                       ))}
                     </div>
@@ -486,11 +528,10 @@ export default function ProblemSelectionPage() {
           className={cn(
             "flex-grow overflow-y-auto p-4 sm:p-6 lg:p-8 transition-all duration-300",
             bgColor,
-            sidebarCollapsed ? "md:pl-16" : "md:pl-64"
+            sidebarCollapsed ? "md:pl-20" : "md:pl-72"
           )}
         >
           <div>
-
             {activeView === "problems" ? (
               <>
                 <div className="mb-8">
@@ -628,7 +669,7 @@ export default function ProblemSelectionPage() {
                       {currentProblems.map((problem) => (
                         <div
                           key={problem.id}
-                          className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-md hover:-translate-y-1 group"
+                          className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200 transition-all duration-300 hover:shadow-md hover:-translate-y-1 group "
                         >
                           <div
                             className="p-6 cursor-pointer"
@@ -644,14 +685,20 @@ export default function ProblemSelectionPage() {
                                   toggleBookmark(problem.id);
                                 }}
                                 className="text-gray-400 hover:text-yellow-500 transition-colors"
-                                aria-label={problem.bookmarked ? "取消收藏此题目" : "收藏此题目"}
+                                aria-label={
+                                  problem.bookmarked
+                                    ? "取消收藏此题目"
+                                    : "收藏此题目"
+                                }
                               >
                                 {problem.bookmarked ? (
                                   <i className="fa-solid fa-bookmark text-yellow-500"></i>
                                 ) : (
                                   <i className="fa-regular fa-bookmark"></i>
                                 )}
-                                <span className="sr-only">{problem.bookmarked ? "已收藏" : "未收藏"}</span>
+                                <span className="sr-only">
+                                  {problem.bookmarked ? "已收藏" : "未收藏"}
+                                </span>
                               </button>
                             </div>
 
@@ -782,6 +829,8 @@ export default function ProblemSelectionPage() {
               </>
             ) : activeView === "profile" ? (
               <ProfilePanel />
+            ) : activeView === "bookmarks" ? (
+              <BookmarkPanel />
             ) : (
               <AIGeneratePanel onProblemsGenerated={handleGeneratedProblems} />
             )}
