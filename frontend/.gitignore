@@ -24,6 +24,3 @@ dist-ssr
 *.sw?
 
 
-
-# 忽略Learn的缓存目录
-/learn
