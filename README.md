@@ -173,6 +173,10 @@ src/
 - 使用下面的命令将本地仓库与远端仓库链接 
 
 ```sh
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
 git remote add origin https://github.com/your_username/your_repo.git
 ```
 
