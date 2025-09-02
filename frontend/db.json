@@ -1,24 +1,132 @@
 {
   "users": [
     {
-      "id": 1,
+      "id": "1",
       "email": "wuyu@xaut.edu.cn",
       "password": "123456"
     },
     {
-      "id": 2,
+      "id": "2",
       "email": "tolei@xaut.edu.cn",
       "password": "234567"
     },
     {
-      "id": 3,
+      "id": "3",
       "email": "zhangsan@xaut.edu.cn",
       "password": "345678"
     },
     {
-      "id": 4,
+      "id": "4",
       "email": "lisi@xaut.edu.cn",
       "password": "456789"
+    }
+  ],
+  "problems": [
+    {
+      "id": "1",
+      "title": "两数之和",
+      "difficulty": "easy",
+      "category": "数据结构",
+      "tags": [
+        "数组",
+        "哈希表",
+        "双指针"
+      ],
+      "completed": true,
+      "bookmarked": true,
+      "通过率": 45.6
+    },
+    {
+      "id": "2",
+      "title": "三数之和",
+      "difficulty": "medium",
+      "category": "数据结构",
+      "tags": [
+        "数组",
+        "双指针",
+        "排序"
+      ],
+      "completed": false,
+      "bookmarked": false,
+      "通过率": 32.5
+    },
+    {
+      "id": "3",
+      "title": "四数之和",
+      "difficulty": "hard",
+      "category": "数据结构",
+      "tags": [
+        "数组",
+        "双指针",
+        "排序"
+      ],
+      "completed": false,
+      "bookmarked": true,
+      "通过率": 28.3
+    },
+    {
+      "id": "4",
+      "title": "最长公共前缀",
+      "difficulty": "easy",
+      "category": "字符串",
+      "tags": [
+        "字符串"
+      ],
+      "completed": true,
+      "bookmarked": false,
+      "通过率": 41.2
+    },
+    {
+      "id": "5",
+      "title": "字符串相乘",
+      "difficulty": "medium",
+      "category": "字符串",
+      "tags": [
+        "字符串",
+        "数学"
+      ],
+      "completed": false,
+      "bookmarked": false,
+      "通过率": 35.7
+    },
+    {
+      "id": "6",
+      "title": "最长回文子串",
+      "difficulty": "medium",
+      "category": "字符串",
+      "tags": [
+        "字符串",
+        "动态规划"
+      ],
+      "completed": false,
+      "bookmarked": true,
+      "通过率": 31.8
+    },
+    {
+      "id": "7",
+      "title": "正则表达式匹配",
+      "difficulty": "hard",
+      "category": "字符串",
+      "tags": [
+        "字符串",
+        "动态规划"
+      ],
+      "completed": false,
+      "bookmarked": false,
+      "通过率": 27.6
+    },
+    {
+      "id": "8",
+      "title": "合并两个有序链表",
+      "difficulty": "easy",
+      "category": "链表",
+      "tags": [
+        "链表",
+        "递归"
+      ],
+      "completed": true,
+      "bookmarked": true,
+      "通过率": 52.3
     }
   ]
 }
