@@ -1,18 +1,8 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { api, Problem } from "../lib/api";
 
-// 题目类型定义
-interface Problem {
-  id: number;
-  title: string;
-  difficulty: "easy" | "medium" | "hard";
-  category: string; // 学科分类，如"数据结构"、"计算机网络"、"Java"等
-  tags: string[]; // 知识点标签，如"哈希表"、"双指针"等
-  completed: boolean;
-  bookmarked: boolean;
-  通过率: number;
-}
 
 export default function BookmarkPanel() {
   const [bookmarkedProblems, setBookmarkedProblems] = useState<Problem[]>([]);
@@ -39,14 +29,46 @@ export default function BookmarkPanel() {
 
   // 初始化收藏题目数据
   useEffect(() => {
-    // 从localStorage获取用户的题目完成状态
-    const savedProblems = localStorage.getItem("userProblems");
-    if (savedProblems) {
-      const allProblems = JSON.parse(savedProblems);
-      // 只获取收藏的题目
-      const bookmarked = allProblems.filter((problem: Problem) => problem.bookmarked);
-      setBookmarkedProblems(bookmarked);
-    }
+    const loadBookmarkedProblems = async () => {
+      try {
+        // 从 localStorage 获取所有题目
+        const savedProblems = localStorage.getItem("userProblems");
+        
+        if (savedProblems) {
+          // 如果有本地存储的数据，使用它
+          const allProblems = JSON.parse(savedProblems);
+          // 只获取收藏的题目
+          const bookmarked = allProblems.filter((problem: any) => problem.bookmarked);
+          setBookmarkedProblems(bookmarked);
+        } else {
+          // 否则从 API 获取数据
+          const allProblems = await api.getProblems();
+          // 只获取收藏的题目
+          const bookmarked = allProblems.filter(problem => problem.bookmarked);
+          setBookmarkedProblems(bookmarked);
+        }
+      } catch (error) {
+        console.error('Failed to load bookmarked problems:', error);
+        toast.error('加载收藏题目失败');
+      }
+    };
+
+    loadBookmarkedProblems();
+    
+    // 监听收藏状态更新事件
+    const handleBookmarksUpdated = (event: CustomEvent) => {
+      if (event.detail && event.detail.updatedProblems) {
+        const bookmarked = event.detail.updatedProblems.filter((problem: any) => problem.bookmarked);
+        setBookmarkedProblems(bookmarked);
+      }
+    };
+    
+    window.addEventListener("bookmarksUpdated", handleBookmarksUpdated as EventListener);
+    
+    // 清理函数
+    return () => {
+      window.removeEventListener("bookmarksUpdated", handleBookmarksUpdated as EventListener);
+    };
   }, []);
 
   // 过滤题目
@@ -93,22 +115,40 @@ export default function BookmarkPanel() {
   ]);
 
   // 取消收藏
-  const removeBookmark = (id: number) => {
-    const savedProblems = localStorage.getItem("userProblems");
-    if (savedProblems) {
-      const updatedProblems = JSON.parse(savedProblems).map((problem: Problem) =>
-        problem.id === id
-          ? { ...problem, bookmarked: false }
-          : problem
-      );
-
-      // 更新localStorage
-      localStorage.setItem("userProblems", JSON.stringify(updatedProblems));
-
-      // 更新状态
-      setBookmarkedProblems(updatedProblems.filter(p => p.bookmarked));
-
-      toast.success("已取消收藏");
+  const removeBookmark = async (id: number) => {
+    try {
+      const problem = bookmarkedProblems.find(p => p.id === id);
+      if (problem) {
+        const updatedProblem = await api.updateProblem(id, {
+          bookmarked: false
+        });
+        
+        // 更新收藏题目列表
+        const updatedBookmarkedProblems = bookmarkedProblems.filter(p => p.id !== id);
+        setBookmarkedProblems(updatedBookmarkedProblems);
+        
+        // 更新 localStorage 中的所有题目数据
+        const savedProblems = localStorage.getItem("userProblems");
+        if (savedProblems) {
+          const allProblems = JSON.parse(savedProblems);
+          const updatedAllProblems = allProblems.map((p: Problem) => 
+            p.id === id ? updatedProblem : p
+          );
+          localStorage.setItem("userProblems", JSON.stringify(updatedAllProblems));
+          
+          // 触发自定义事件，通知其他组件收藏状态已更新
+          window.dispatchEvent(
+            new CustomEvent("bookmarksUpdated", {
+              detail: { updatedProblems: updatedAllProblems },
+            })
+          );
+        }
+        
+        toast.success("已取消收藏");
+      }
+    } catch (error) {
+      console.error('Failed to remove bookmark:', error);
+      toast.error('操作失败');
     }
   };
 

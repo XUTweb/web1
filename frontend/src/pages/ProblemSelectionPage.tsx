@@ -7,122 +7,14 @@ import AIGeneratePanel from "@/pages/AIGeneratePanel";
 import BookmarkPanel from "@/pages/BookmarkPanel";
 import { useContext } from "react";
 import { AuthContext } from "@/contexts/authContext";
+import { api, Problem } from "@/lib/api";
 
-// 题目类型定义
-interface Problem {
-  id: number;
-  title: string;
-  difficulty: "easy" | "medium" | "hard";
-  category: string; // 学科分类，如"数据结构"、"计算机网络"、"Java"等
-  tags: string[]; // 知识点标签，如"哈希表"、"双指针"等
-  completed: boolean;
-  bookmarked: boolean;
-  通过率: number;
-}
+/*
+useEffect
 
-// 模拟题目数据
-const MOCK_PROBLEMS: Problem[] = [
-  {
-    id: 1,
-    title: "两数之和",
-    difficulty: "easy",
-    category: "数据结构",
-    tags: ["数组", "哈希表", "双指针"],
-    completed: true,
-    bookmarked: true,
-    通过率: 45.6,
-  },
-  {
-    id: 2,
-    title: "有效的括号",
-    difficulty: "easy",
-    category: "数据结构",
-    tags: ["字符串", "栈"],
-    completed: true,
-    bookmarked: false,
-    通过率: 42.8,
-  },
-  {
-    id: 3,
-    title: "合并两个有序链表",
-    difficulty: "easy",
-    category: "数据结构",
-    tags: ["递归", "链表"],
-    completed: false,
-    bookmarked: true,
-    通过率: 58.2,
-  },
-  {
-    id: 4,
-    title: "IP地址与MAC地址的关系",
-    difficulty: "medium",
-    category: "计算机网络",
-    tags: ["网络层", "数据链路层"],
-    completed: false,
-    bookmarked: false,
-    通过率: 61.5,
-  },
-  {
-    id: 5,
-    title: "进程调度算法",
-    difficulty: "medium",
-    category: "操作系统",
-    tags: ["进程管理", "调度策略"],
-    completed: false,
-    bookmarked: true,
-    通过率: 33.2,
-  },
-  {
-    id: 6,
-    title: "Java多线程同步机制",
-    difficulty: "medium",
-    category: "Java",
-    tags: ["多线程", "并发编程", "synchronized"],
-    completed: false,
-    bookmarked: false,
-    通过率: 65.4,
-  },
-  {
-    id: 7,
-    title: "Python装饰器原理",
-    difficulty: "hard",
-    category: "Python",
-    tags: ["函数式编程", "元编程"],
-    completed: false,
-    bookmarked: true,
-    通过率: 49.8,
-  },
-  {
-    id: 8,
-    title: "C语言指针与数组",
-    difficulty: "hard",
-    category: "C语言",
-    tags: ["指针", "内存管理", "数组"],
-    completed: false,
-    bookmarked: false,
-    通过率: 38.1,
-  },
-  {
-    id: 9,
-    title: "Cache替换算法",
-    difficulty: "medium",
-    category: "计算机组成原理",
-    tags: ["存储系统", "缓存"],
-    completed: false,
-    bookmarked: false,
-    通过率: 52.3,
-  },
-  {
-    id: 10,
-    title: "时间复杂度分析",
-    difficulty: "easy",
-    category: "算法分析",
-    tags: ["复杂度", "渐进分析"],
-    completed: true,
-    bookmarked: false,
-    通过率: 72.1,
-  },
-];
+
+
+ */
 
 // 题目分类
 const CATEGORIES = [
@@ -196,16 +88,56 @@ export default function ProblemSelectionPage() {
     setShowSettingsMenu(!showSettingsMenu);
   };
 
-  // 初始化题目数据
   useEffect(() => {
-    // 从localStorage获取用户的题目完成状态
-    const savedProblems = localStorage.getItem("userProblems");
-    if (savedProblems) {
-      setProblems(JSON.parse(savedProblems));
-    } else {
-      setProblems(MOCK_PROBLEMS);
-      localStorage.setItem("userProblems", JSON.stringify(MOCK_PROBLEMS));
-    }
+    const loadProblems = async () => {
+      try {
+        // 从 localStorage 获取用户的题目完成状态
+        const savedProblems = localStorage.getItem("userProblems");
+
+        if (savedProblems) {
+          // 如果有本地存储的数据，使用它
+          setProblems(JSON.parse(savedProblems));
+        } else {
+          // 否则从 API 获取数据
+          const problems = await api.getProblems();
+          setProblems(problems);
+          localStorage.setItem("userProblems", JSON.stringify(problems));
+        }
+      } catch (error) {
+        console.error("Failed to load problems:", error);
+        toast.error("加载题目失败");
+      }
+    };
+
+    loadProblems();
+
+    // 监听收藏状态更新事件
+    const handleBookmarksUpdated = (event: CustomEvent) => {
+      setProblems(event.detail.updatedProblems);
+    };
+
+    // 监听导航到题目列表的事件
+    const handleNavigateToProblems = () => {
+      setActiveView("problems");
+    };
+
+    window.addEventListener(
+      "bookmarksUpdated",
+      handleBookmarksUpdated as EventListener
+    );
+    window.addEventListener("navigateToProblems", handleNavigateToProblems);
+
+    // 清理函数
+    return () => {
+      window.removeEventListener(
+        "bookmarksUpdated",
+        handleBookmarksUpdated as EventListener
+      );
+      window.removeEventListener(
+        "navigateToProblems",
+        handleNavigateToProblems
+      );
+    };
   }, []);
 
   // 过滤题目
@@ -258,21 +190,35 @@ export default function ProblemSelectionPage() {
   ]);
 
   // 切换题目收藏状态
-  const toggleBookmark = (id: number) => {
-    const updatedProblems = problems.map((problem) =>
-      problem.id === id
-        ? { ...problem, bookmarked: !problem.bookmarked }
-        : problem
-    );
-    setProblems(updatedProblems);
-    localStorage.setItem("userProblems", JSON.stringify(updatedProblems));
-    toast.success(
-      `题目已${
-        updatedProblems.find((p) => p.id === id)?.bookmarked
-          ? "收藏"
-          : "取消收藏"
-      }`
-    );
+  const toggleBookmark = async (id: number) => {
+    try {
+      const problem = problems.find((p) => p.id === id);
+      if (problem) {
+        const updatedProblem = await api.updateProblem(id, {
+          bookmarked: !problem.bookmarked,
+        });
+
+        const updatedProblems = problems.map((p) =>
+          p.id === id ? updatedProblem : p
+        );
+
+        setProblems(updatedProblems);
+        localStorage.setItem("userProblems", JSON.stringify(updatedProblems));
+        toast.success(
+          `题目已${updatedProblem.bookmarked ? "收藏" : "取消收藏"}`
+        );
+        
+        // 触发自定义事件，通知其他组件收藏状态已更新
+        window.dispatchEvent(
+          new CustomEvent("bookmarksUpdated", {
+            detail: { updatedProblems },
+          })
+        );
+      }
+    } catch (error) {
+      console.error("Failed to update bookmark:", error);
+      toast.error("操作失败");
+    }
   };
 
   // 导航到题目详情页
