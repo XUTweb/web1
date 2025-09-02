@@ -141,3 +141,46 @@ src/
 ## 项目解释:
 
 这个项目是提供计算机类大学生刷题的网站项目,我们在网页上提供了一些题目,用户可以登录后进行刷题,并且可以查看自己的做题记录,以及一些统计信息。并提供了 Ai 生成题目自动检查答案的功能。
+---
+
+## 工作流
+
+### 1.下载git 
+![alt text](流程照片/git_download.png)
+
+[流程](https://blog.csdn.net/mukes/article/details/115693833)
+
+### 2.fork项目
+1.
+![alt text](流程照片/fork1.png)
+> 这里点击进行fork
+2.
+![alt text](流程照片/fork2.png)
+> 将项目fork到自己的仓库
+
+### 3.下载项目到本地文件夹
+
+1.![alt text](流程照片/download.png)
+> 点击克隆或者下载
+
+
+### 4.将修改后的代码提交到自己账号上的仓库里面
+1. 在vscode 里面"ctrl+j"打开终端打开git bash
+
+2. 将本地仓库与远端仓库链接
+![alt text](流程照片/链接.png)
+
+- 使用下面的命令将本地仓库与远端仓库链接 
+
+```sh
+git remote add origin https://github.com/your_username/your_repo.git
+```
+
+3. 提交修改
+
+```
+git add .
+git commit -m "your commit message"
+git push origin main
+```
+
