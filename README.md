@@ -176,7 +176,11 @@ src/
 git remote add origin https://github.com/your_username/your_repo.git
 ```
 
-3. 提交修改
+> 这里如果使用https链接的话不行,建议使用ssh密钥 ,点击下面进行跳转学习.
+
+[ssh密钥进行github身份验证，ssh公私密钥使用详解，github密钥配置与使用，git密钥使用详解，git入门教程](https://www.bilibili.com/video/BV1dV411G77N?vd_source=89cb973c4467150d3eb28469c0fa7c58)
+
+1. 提交修改
 
 ```
 git add .
